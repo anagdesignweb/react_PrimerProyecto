@@ -30,6 +30,8 @@ export function App () {
                 const {userName, name, isFollowing} = user
                 return (
                     <TwitterFollowCard
+                    /* en reac cuando renderizamso elementos y hacemos bucles o algo asi que se repita hay que darle siemrpe al elemtne una key unica, para asegurarnos de que es unica podemos usar algo que sepamos que es unico de este elemento como el userName que suele ser unico, o si tuviese un id de base de datos añadiendole una palabra para que sepamos que no se repite en otro lado del codigo*/
+                        key={userName+name}
                         userName={userName}
                         name={name}
                         initialIsFollowing={isFollowing}
