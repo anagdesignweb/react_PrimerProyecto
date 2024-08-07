@@ -1,39 +1,13 @@
 import { useState } from 'react'
 import './App.css'
+import confetti from 'canvas-confetti'
 
+import { Square } from './Components/Square'
+import {WINNER_COMBOS, TURNS } from './Components/constants'
+import { WinnerModal } from './Components/WinnerModal'
 
-// constante para definir los turnos que va a tener el juego
-const TURNS = {
-  X:'x',
-  O:'o'
-}
-
-// 4. definimos el cuadrado de cada celda: children lo que lleva dentro del cuadro, updateBoard es la forma de actualizar ese cuadrado, index el indice del cuadrado con respecto al tablero.
-const Square = ({children, isSelected, updateBoard, index}) => {
-  const className= `square ${isSelected ? 'is-selected' : ''}`
-
-  const handleClick = () => {
-    updateBoard(index)
-    //window.alert("ha hecho click")
-  }
-
-  return (
-    <div onClick={handleClick} className={className}>
-      {children}
-    </div>
-  )
-}
-
-const WINNER_COMBOS = [
-  [0,1,2],
-  [3,4,5],
-  [6,7,8],
-  [0,3,6],
-  [1,4,7],
-  [2,5,8],
-  [0,4,8],
-  [2,4,6]
-]
+//4. aqui estaba antes el componente, ahora esta separado
+// Las CONSTANTES las vamos a sacar tambien a un archivo constants.js
 
 function App() {
 // estado para crear y actualizar tablero
@@ -57,7 +31,15 @@ const checkWinner = (boardToCheck) => {
     }
   }
 }
-
+const resetGame = () => {
+  //le damos los valores iniciales a los estados
+  setBoard(Array(9).fill(null))
+  setTurn(TURNS.X)
+  setWinner(null)
+}
+const checkEndGame = (newBoard) => {
+ return newBoard.every((square)=> square !== null)
+}
 const updateBoard = (index) => {
   // no se escribe nada si ya tiene algo
   if(board[index] || winner) return
@@ -72,20 +54,24 @@ const updateBoard = (index) => {
   const newWinner = checkWinner(newBoard)
   if (newWinner) {
     setWinner(newWinner)
+    confetti()
     //alert(`el ganador es ${newWinner}`) este alert no funcionaria, porque react es asincrono, por lo tanto cuando pasas ese alert aun no se ha actualizao el tablero, asi que esta seria una mala opcion.
-  } // TODO: check if game is over
+  } else if (checkEndGame(newBoard)){
+    setWinner(false) // empate
+  }
 }
 
   return (
 
     <main className='board'>
       <h1>Tic tac toe</h1>
+      <button onClick={resetGame}>Empezar de nuevo</button>
       <section className='game'>
         {
-          board.map((_,index) => {
+          board.map((square,index) => {
             return (
               <Square key={index} index={index} updateBoard={updateBoard}>
-                {board[index]}
+                {square}
               </Square>
             )
           })
@@ -96,25 +82,7 @@ const updateBoard = (index) => {
         <Square isSelected={turn === TURNS.O}>{TURNS.O}</Square>
       </section>
 
-      {
-        winner !== null && (
-          <section className='winner'>
-            <div className='text'>
-              <h2>
-                {
-                  winner === false ? 'Empate' : 'Ganó'
-                }
-              </h2>
-              <header className='win'>
-                {winner && <Square>{winner}</Square>}
-              </header>
-              <footer>
-                <button onClick={resetGame}>Empezar de nuevo</button>
-              </footer>
-            </div>
-          </section>
-      )
-      }
+        <WinnerModal resetGame={resetGame} winner={winner} />
 
 
     </main>
